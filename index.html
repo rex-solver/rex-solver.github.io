@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rex — A Family of Reversible Exponential (Stochastic) Runge–Kutta Solvers</title>
-<meta name="description" content="Rex: an algebraically reversible family of exponential (stochastic) Runge–Kutta solvers for diffusion models and neural differential equations. ICML 2026 spotlight.">
+<meta name="description" content="Rex: an algebraically reversible family of exponential (stochastic) Runge–Kutta solvers for diffusion models. ICML 2026 oral.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Tufte-inspired typography: ET Book for body/display, Inconsolata for monospace. -->
@@ -2006,7 +2006,9 @@ h2::after{
     <span class="hero-venue">ICML 2026 <span class="dot" aria-hidden="true">&bull;</span> <span class="v-spotlight">Oral</span></span>
     <h1 class="hero-title"><span class="rex">Rex</span>: Algebraically reversible solvers for diffusion models</h1>
     <div class="hero-title-rule"></div>
-    <p class="hero-sub">A family of <strong>algebraically reversible</strong> exponential (stochastic) Runge&ndash;Kutta solvers for diffusion models &mdash; the first reversible scheme for diffusion <em>SDEs</em> that doesn't store the entire Brownian trajectory, with arbitrary order of convergence and a non-zero region of stability.</p>
+    <p class="hero-sub">
+      Modern generative models &mdash; the engines behind today's image generators and molecular simulators &mdash; turn noise into data by following a smooth trajectory, integrated step by step with a numerical <em>solver</em>. Many tasks (editing a generated image, recovering the noise that produced it, running a simulation backwards in time) require <strong>retracing</strong> that trajectory in reverse, but ordinary solvers leak tiny rounding errors at every step and the path home drifts away from where it started.
+      <strong>Rex</strong> is a new family of solvers that are <em>algebraically reversible</em>: the reverse step exactly undoes the forward step, so the full trajectory can be replayed in either direction with near&#8209;machine precision. It handles both the deterministic (ODE) and stochastic (SDE) settings used by diffusion and flow models, comes with strong theoretical guarantees on accuracy and stability, and delivers measurable improvements on Boltzmann sampling, image generation, and image editing.</p>
     <div class="hero-links">
       <a href="https://arxiv.org/abs/2502.08834" target="_blank" rel="noopener">paper</a>
       <span class="sep" aria-hidden="true">&bull;</span>
@@ -2075,7 +2077,7 @@ h2::after{
         </button>
       </div>
       <p class="mol-hint">Drag a panel to rotate &middot; scroll/pinch to zoom &middot; space to play/pause &middot; R to reset</p>
-      <figcaption><span class="figlabel">Figure 1.</span> Every atom of a tri-alanine peptide (Ala&ndash;Ala&ndash;Ala, polyproline&nbsp;II conformation) is <em>encoded</em> from noise to a folded conformation (forward integration), then <em>decoded</em> back to noise (backward integration). <em>Top:</em> a generic non-reversible solver accumulates truncation error at every step; the round-trip endpoint $\boldsymbol x'_0$ drifts away from $\boldsymbol x_0$. <em>Bottom:</em> <em>Rex</em> retraces the forward chords exactly, and every atom returns to its starting position.</figcaption>
+      <figcaption><span class="figlabel">Figure 1.</span> Every atom of a tri-alanine peptide (Ala&ndash;Ala&ndash;Ala) is <em>encoded</em> from noise to a folded conformation (forward integration), then <em>decoded</em> back to noise (backward integration). <em>Top:</em> a generic non-reversible solver accumulates truncation error at every step; the round-trip endpoint $\boldsymbol x'_0$ drifts away from $\boldsymbol x_0$. <em>Bottom:</em> <em>Rex</em> retraces the forward chords exactly, and every atom returns to its starting position.</figcaption>
     </figure>
   </div>
 </section>
