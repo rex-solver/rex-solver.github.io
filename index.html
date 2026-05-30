@@ -2022,7 +2022,7 @@ h2::after{
     <div class="authors-section">
       <div class="authors-line">
         <span class="author-chip"><a class="a-name" href="https://zblasingame.github.io" target="_blank">Zander W. Blasingame</a><sup>* 1,2</sup></span>
-        <span class="author-chip"><a class="a-name" href="#" target="_blank">Chen Liu</a><sup>2</sup></span>
+        <span class="author-chip"><a class="a-name" href="https://camel.clarkson.edu" target="_blank">Chen Liu</a><sup>2</sup></span>
       </div>
       <div class="affiliations-line">
         <span class="aff-num">1</span>AITHYRA<span class="aff-sep">&middot;</span>
@@ -2266,10 +2266,15 @@ h2::after{
       <figcaption><span class="figlabel">Figure 2.</span> Five forward Euler steps $\boldsymbol x_{n+1} = \boldsymbol x_n + h\,\boldsymbol f(\boldsymbol x_n)$ encode a data point to noise; the dotted curve is the true ODE solution and the bold polyline is what Euler computes. <em>Top:</em> the reverse Euler iteration uses different tangents at each step, so the recovered point $\boldsymbol x'_0$ drifts from $\boldsymbol x_0$ and the round trip incurs a nonzero error $\varepsilon &gt; 0$. <em>Bottom:</em> in <em>Rex</em>, each backward step is the closed-form algebraic inverse of the corresponding forward step; the same chords are retraced and the trajectory closes exactly.</figcaption>
     </figure>
 
-    <p class="reveal">Two largely independent research traditions have circled this problem from opposite directions. The first grew up inside the diffusion community itself, retrofitting bijective structure onto specific samplers: EDICT&rsquo;s coupled latent trick, BDIA&rsquo;s bidirectional integration,
-      and BELM&rsquo;s linear-multistep construction each reverse-engineer reversibility into one particular solver. The second comes from the neural differential-equation community, where reversibility has been pursued as a memory-efficiency device for training &mdash; from the original Neural ODE adjoint to MALI, reversible Heun, and the recent McCallum&ndash;Foster framework. Rex sits at the confluence: it borrows the McCallum&ndash;Foster coupling from the neural-DE lineage and adapts it to the exponential-integrator structure that the diffusion lineage relies on, yielding a single construction that subsumes both.</p>
+    <p class="reveal">
+      Two largely independent research traditions have examined this problem from different perspectives.
+      The first grew up inside the diffusion community itself, developing schemes with bijective structure: EDICT&rsquo;s coupled latent trick, BDIA&rsquo;s bidirectional integration,
+      and BELM&rsquo;s linear-multistep construction.
+      The second comes from the neural differential equation community, where reversibility has been pursued for memory-efficient backpropagation through neural differential equations.
+      Early milestones there include MALI, followed by reversible Heun, and then the recent McCallum&ndash;Foster framework.
+      Rex sits at the confluence: it borrows the McCallum&ndash;Foster coupling from the neural ODE lineage and adapts it to the exponential-integrator structure that the diffusion lineage relies on, yielding a single construction that subsumes both.</p>
 
-    <!-- Time-aligned lineage timeline. Single shared year axis 2018→2026
+    <!-- Time-aligned lineage timeline. Single shared year axis 2021→2026
          down the center; two rails of prior work flank it (left: diffusion-
          model inversion, right: neural-DE community). Each entry sits on
          the row corresponding to its publication year. Empty year-rows
@@ -2278,80 +2283,66 @@ h2::after{
          in as each year-row scrolls past the viewport center (handled by
          setupLineageTimeline() in the inline JS at the bottom of the page). -->
     <div class="lineage-timeline reveal" aria-label="Time-aligned lineages of reversible solvers converging on Rex">
-      <span class="lt-kicker">Lineages of reversibility</span>
+      <span class="lt-kicker">Timeline of reversible solver research</span>
 
       <div class="lt-headers" aria-hidden="true">
         <div class="lt-h-left">Diffusion inversion</div>
         <div class="lt-h-axis"></div>
-        <div class="lt-h-right">Neural diff. eqs.</div>
+        <div class="lt-h-right">Neural differential equations</div>
       </div>
 
       <!-- Each row is one sub-row of the time grid. Years that host
            multiple methods on one rail occupy multiple consecutive sub-rows,
            and the year label spans them all via `grid-row: N / span K`.
-           Every dot still corresponds to a single method on its own sub-row.
-           Empty year-rows (2019, 2022, 2025) keep the time axis honest. -->
+           Every entry sits on exactly one row so each dot lands on a
+           concrete grid point. Empty year-rows (2022, 2025) keep the
+           time axis honest. -->
       <div class="lt-grid" data-progress="0">
 
-        <!-- Row 1 · 2018 — Neural ODEs (right) -->
-        <div class="lt-year" data-year="2018" style="grid-row:1">2018</div>
-        <div class="lt-entry lt-entry-right" data-year="2018" style="grid-row:1">
-          <span class="lt-name">Neural ODEs <span class="cite" data-key="chen2018neuralode"></span></span>
-          <span class="lt-sub">Adjoint method; reverse-time assumed exact.</span>
-        </div>
+        <div class="lt-year" data-year="2021" style="grid-row:1">2021</div>
 
-        <!-- Row 2 · 2019 — empty -->
-        <div class="lt-year" data-year="2019" style="grid-row:2">2019</div>
-
-        <!-- Row 3 · 2020 — Neural SDEs (right) -->
-        <div class="lt-year" data-year="2020" style="grid-row:3">2020</div>
-        <div class="lt-entry lt-entry-right" data-year="2020" style="grid-row:3">
-          <span class="lt-name">Neural SDEs <span class="cite" data-key="li2020sdes,kidger2021neural"></span></span>
-          <span class="lt-sub">Stochastic adjoint for SDE training.</span>
-        </div>
-
-        <!-- Rows 4–5 · 2021 — Score-SDE (left, spans 2) · MALI (right r4) + Reversible Heun (right r5) -->
-        <div class="lt-year" data-year="2021" style="grid-row:4 / span 2">2021</div>
-        <div class="lt-entry lt-entry-left" data-year="2021" style="grid-row:4 / span 2">
-          <span class="lt-name">Score-SDE / DDPM <span class="cite" data-key="song2021scorebased"></span></span>
-          <span class="lt-sub">Continuous-time; no exact discrete inverse.</span>
-        </div>
-        <div class="lt-entry lt-entry-right" data-year="2021" style="grid-row:4">
+        <div class="lt-entry lt-entry-right" data-year="2021" style="grid-row:1">
           <span class="lt-name">MALI <span class="cite" data-key="zhuang2021mali"></span></span>
           <span class="lt-sub">Asynchronous leapfrog; ODE-only.</span>
         </div>
-        <div class="lt-entry lt-entry-right" data-year="2021" style="grid-row:5">
-          <span class="lt-name">Reversible Heun <span class="cite" data-key="kidger2021efficient"></span></span>
-          <span class="lt-sub">Reversible SDE solver; vanishing stability.</span>
+
+        <div class="lt-entry lt-entry-right" data-year="2021" style="grid-row:2">
+          <span class="lt-name">Reversible Heun <span class="cite" data-key="kidger2021neural"></span></span>
+          <span class="lt-sub">Reversible ODE/SDE solver.</span>
         </div>
 
-        <!-- Row 6 · 2022 — empty -->
-        <div class="lt-year" data-year="2022" style="grid-row:6">2022</div>
+        <div class="lt-entry lt-entry-left" data-year="2021" style="grid-row:3">
+          <span class="lt-name">DDIM Inversion <span class="cite" data-key="song2021scorebased"></span></span>
+          <span class="lt-sub">Non-exact inversion.</span>
+        </div>
 
-        <!-- Row 7 · 2023 — EDICT (left) -->
-        <div class="lt-year" data-year="2023" style="grid-row:7">2023</div>
-        <div class="lt-entry lt-entry-left" data-year="2023" style="grid-row:7">
+        <!-- Row 4 · 2022 — empty -->
+        <div class="lt-year" data-year="2022" style="grid-row:4">2022</div>
+
+        <!-- Row 5 · 2023 — EDICT (left) -->
+        <div class="lt-year" data-year="2023" style="grid-row:5">2023</div>
+        <div class="lt-entry lt-entry-left" data-year="2023" style="grid-row:5">
           <span class="lt-name">EDICT <span class="cite" data-key="wallace2023edict"></span></span>
           <span class="lt-sub">Coupled-latent trick for DDIM.</span>
         </div>
 
-        <!-- Rows 8–9 · 2024 — BDIA (left r8) + BELM (left r9) · McCallum–Foster (right, spans 2) -->
-        <div class="lt-year" data-year="2024" style="grid-row:8 / span 2">2024</div>
-        <div class="lt-entry lt-entry-left" data-year="2024" style="grid-row:8">
+        <!-- Rows 6–7 · 2024 — BDIA (left r6) + BELM (left r7) · McCallum–Foster (right r6) -->
+        <div class="lt-year" data-year="2024" style="grid-row:6">2024</div>
+        <div class="lt-entry lt-entry-left" data-year="2024" style="grid-row:6">
           <span class="lt-name">BDIA <span class="cite" data-key="zhang2024bdia"></span></span>
           <span class="lt-sub">Bidirectional integration.</span>
         </div>
-        <div class="lt-entry lt-entry-right" data-year="2024" style="grid-row:8 / span 2">
+        <div class="lt-entry lt-entry-right" data-year="2024" style="grid-row:6">
           <span class="lt-name">McCallum&ndash;Foster <span class="cite" data-key="mccallum2024foster"></span></span>
-          <span class="lt-sub">Arbitrary-order reversible ODE solver.</span>
+          <span class="lt-sub">Arbitrary-order reversible ODE solver, with non-trivial stability.</span>
         </div>
-        <div class="lt-entry lt-entry-left" data-year="2024" style="grid-row:9">
+        <div class="lt-entry lt-entry-left" data-year="2024" style="grid-row:7">
           <span class="lt-name">BELM / O-BELM <span class="cite" data-key="wang2024belm"></span></span>
-          <span class="lt-sub">Linear multi-step method</span>
+          <span class="lt-sub">Linear multi-step method.</span>
         </div>
 
-        <!-- Row 10 · 2025 — empty -->
-        <div class="lt-year" data-year="2025" style="grid-row:10">2025</div>
+        <!-- Row 8 · 2025 — empty -->
+        <div class="lt-year" data-year="2025" style="grid-row:8">2025</div>
 
       </div><!-- /lt-grid -->
 
