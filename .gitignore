@@ -1,3 +1,8 @@
 outputs
+.opencode
+.tmp
+
+lab_pr.html
+test-results
 
 *.DS_STORE
