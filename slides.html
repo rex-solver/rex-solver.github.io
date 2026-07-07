@@ -444,6 +444,30 @@ html[data-theme="dark"] .reveal [data-overview-slide]{
   animation:ov-caret .8s steps(1) infinite;
 }
 @keyframes ov-caret{50%{opacity:0}}
+
+/* summary of what Rex gives us — final reveal on the overview slide */
+.reveal .ov-summary{
+  max-width:34em;margin:1.4em 0 0;
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .5s ease,transform .5s ease;
+}
+.reveal .ov-summary.is-shown{opacity:1;transform:translateY(0);pointer-events:auto;}
+.reveal .ov-summary-lede{
+  font-family:var(--mono);font-size:.5em;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);
+  margin:0 0 .5em;
+}
+.reveal .ov-summary-list{
+  list-style:none;padding:0;margin:0;
+  font-family:var(--mono);font-size:.56em;line-height:1.55;color:var(--text-secondary);
+  columns:2;column-gap:1.5em;
+}
+.reveal .ov-summary-list li{
+  position:relative;padding-left:1.1em;margin:.2em 0;break-inside:avoid;
+}
+.reveal .ov-summary-list li::before{
+  content:"\2192";position:absolute;left:0;color:var(--mauve);font-weight:700;
+}
 @media (max-width:820px){
   .reveal .ov-item{flex-direction:column;align-items:flex-start;gap:.15em}
   .reveal .ov-item .ov-item-desc{white-space:normal}
@@ -1562,17 +1586,27 @@ html[data-theme="dark"] .reveal .mf-machine-svg .mf-machine-label{fill:var(--mau
 .reveal .pp-factory{
   position:relative;
   opacity:1;visibility:visible;
-  padding:0 140px;
+  padding:0 175px;
 }
-.reveal .pp-cycle-left{position:absolute;left:0;top:50%;transform:translateY(-50%);text-align:center;width:130px;}
-.reveal .pp-cycle-right{position:absolute;right:0;top:50%;transform:translateY(-50%);text-align:center;width:130px;}
+.reveal .pp-cycle-left{position:absolute;left:0;top:50%;transform:translateY(-50%);width:170px;
+  display:flex;flex-direction:column;gap:.7em;align-items:center;}
+.reveal .pp-cycle-right{position:absolute;right:0;top:50%;transform:translateY(-50%);width:170px;
+  display:flex;flex-direction:column;gap:.7em;align-items:stretch;}
 .reveal .pp-factory .mf-machine-svg{display:block;width:100%;margin:0 auto;}
-.reveal .pp-tableau{font-size:.5em;color:var(--text-secondary);opacity:0;transition:opacity .3s ease;}
-.reveal .pp-tableau-caption{font-family:var(--mono);font-size:.46em;color:var(--text-dim);margin-top:.3em;opacity:0;transition:opacity .3s ease;}
-.reveal .pp-result{font-family:var(--mono);font-size:.5em;font-weight:600;color:var(--accent-pink);opacity:0;transition:opacity .3s ease;}
-.reveal .pp-factory[data-stage="3"] .pp-tableau,
-.reveal .pp-factory[data-stage="3"] .pp-tableau-caption,
-.reveal .pp-factory[data-stage="3"] .pp-result{opacity:1;}
+.reveal .pp-in-item{text-align:center;opacity:0;transform:translateX(-14px);transition:opacity .45s ease,transform .45s ease;}
+.reveal .pp-tableau{font-size:.46em;color:var(--text-secondary);}
+.reveal .pp-tableau-caption{font-family:var(--mono);font-size:.42em;color:var(--text-dim);margin-top:.15em;}
+.reveal .pp-result{font-family:var(--mono);font-size:.44em;font-weight:600;color:var(--accent-pink);
+  text-align:center;padding:.35em .4em;border-radius:6px;
+  background:var(--bg-card);border:1px solid var(--hairline);
+  opacity:0;transform:translateX(14px);transition:opacity .45s ease,transform .45s ease;}
+/* all inputs + outputs reveal together at stage 3, with a slight stagger */
+.reveal .pp-factory[data-stage="3"] .pp-in-item,
+.reveal .pp-factory[data-stage="3"] .pp-result{opacity:1;transform:translateX(0);}
+.reveal .pp-factory[data-stage="3"] .pp-in-item:nth-child(2){transition-delay:.1s;}
+.reveal .pp-factory[data-stage="3"] .pp-in-item:nth-child(3){transition-delay:.2s;}
+.reveal .pp-factory[data-stage="3"] .pp-result:nth-child(2){transition-delay:.1s;}
+.reveal .pp-factory[data-stage="3"] .pp-result:nth-child(3){transition-delay:.2s;}
 /* QR code (right margin, outside console body) */
 .reveal [data-mf-machine],
 .reveal [data-srk-slide]{position:relative}
@@ -1640,10 +1674,25 @@ html[data-theme="dark"] .reveal .mf-machine-svg .mf-machine-label{fill:var(--mau
 .reveal .tl-svg .tl-dot,.reveal .tl-svg .tl-name,.reveal .tl-svg .tl-idea,.reveal .tl-svg .tl-venue,.reveal .tl-svg .tl-year,.reveal .tl-svg .tl-header,.reveal .tl-svg .tl-cite{opacity:0;}
 .reveal .tl-svg .tl-dot{transform:scale(0);transform-origin:center;transform-box:fill-box;}
 
-section.present .tl-svg .tl-stream-top,section.present .tl-svg .tl-stream-bot{stroke-dashoffset:0;transition:stroke-dashoffset 3s linear;}
-section.present .tl-svg .tl-stream-merge{stroke-dashoffset:0;transition:stroke-dashoffset 1s linear 3s;}
+/* history part (top pink stream + top nodes + axis) animates on slide entry.
+   Deferred parts (bottom cyan stream, merge, bottom nodes, Rex) are forced
+   hidden at data-tl-stage="0" and animate in at data-tl-stage="1". */
+section.present .tl-svg .tl-stream-top{stroke-dashoffset:0;transition:stroke-dashoffset 3s linear;}
 section.present .tl-svg .tl-dot{opacity:1;transform:scale(1);transition:opacity .4s ease,transform .4s cubic-bezier(.34,1.56,.64,1);}
 section.present .tl-svg .tl-name,section.present .tl-svg .tl-idea,section.present .tl-svg .tl-venue,section.present .tl-svg .tl-year,section.present .tl-svg .tl-header,section.present .tl-svg .tl-cite{opacity:1;transition:opacity .5s ease;}
+
+/* deferred part stays hidden until the bullets are done — gated on data-tl-stage.
+   At stage 0 the deferred streams/dots/text are forced hidden (overriding the
+   generic .present reveal above); at stage 1 they animate in. */
+.reveal .tl-svg .tl-stream.tl-deferred{stroke-dashoffset:100;transition:none;}
+[data-tl-stage="0"] .tl-svg .tl-stream.tl-deferred{stroke-dashoffset:100;transition:none;}
+[data-tl-stage="0"] .tl-svg g.tl-deferred .tl-dot{opacity:0;transform:scale(0);transition:none;}
+[data-tl-stage="0"] .tl-svg g.tl-deferred text{opacity:0;transition:none;}
+
+[data-tl-stage="1"] .tl-svg .tl-stream-bot.tl-deferred{stroke-dashoffset:0;transition:stroke-dashoffset .9s linear;}
+[data-tl-stage="1"] .tl-svg .tl-stream-merge.tl-deferred{stroke-dashoffset:0;transition:stroke-dashoffset .5s linear .9s;}
+[data-tl-stage="1"] .tl-svg g.tl-deferred .tl-dot{opacity:1;transform:scale(1);transition:opacity .3s ease,transform .3s cubic-bezier(.34,1.56,.64,1);}
+[data-tl-stage="1"] .tl-svg g.tl-deferred text{opacity:1;transition:opacity .35s ease;}
 
 /* ───── theme toggle — discrete symbol, top-right corner ─────
    A single glyph: moon (☾) in light mode, sun (☀) in dark mode.
@@ -2032,7 +2081,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
           <h2>Reversible Diffusion Solvers</h2>
         </div>
 
-        <div class="tl-wrap tl-wrap-full">
+        <div class="tl-wrap tl-wrap-full" data-tl-stage="0">
           <svg class="tl-svg" viewBox="0 0 940 255" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="rexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -2054,9 +2103,9 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
             <line class="tl-tick" x1="746" y1="217" x2="746" y2="223"/>
             <text class="tl-year" x="746" y="240">2026</text>
             <path class="tl-stream tl-stream-top" pathLength="100" d="M 70 80 L 585 80"/>
-            <path class="tl-stream tl-stream-bot" pathLength="100" d="M 70 160 L 585 160"/>
-            <path class="tl-stream tl-stream-merge tl-stream-merge-top" pathLength="100" d="M 585 80 Q 697 80 810 120"/>
-            <path class="tl-stream tl-stream-merge tl-stream-merge-bot" pathLength="100" d="M 585 160 Q 697 160 810 120"/>
+            <path class="tl-stream tl-stream-bot tl-deferred" pathLength="100" d="M 70 160 L 585 160"/>
+            <path class="tl-stream tl-stream-merge tl-stream-merge-top tl-deferred" pathLength="100" d="M 585 80 Q 697 80 810 120"/>
+            <path class="tl-stream tl-stream-merge tl-stream-merge-bot tl-deferred" pathLength="100" d="M 585 160 Q 697 160 810 120"/>
             <g style="--d:.06s">
               <circle class="tl-dot tl-dot-top" cx="81" cy="80" r="6" style="transition-delay:var(--d)"/>
               <text class="tl-name" x="81" y="62" style="transition-delay:calc(var(--d) + .15s)">DDIM Inversion</text>
@@ -2085,27 +2134,27 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
               <text class="tl-venue" x="585" y="30" style="transition-delay:calc(var(--d) + .35s)">NeurIPS 2024</text>
               <text class="tl-cite" data-key="wang2024belm" x="613" y="62" style="transition-delay:calc(var(--d) + .4s)"></text>
             </g>
-            <g style="--d:.23s">
+            <g class="tl-deferred" style="--d:.1s">
               <circle class="tl-dot tl-dot-bot" cx="113" cy="160" r="6" style="transition-delay:var(--d)"/>
               <text class="tl-name" x="113" y="178" style="transition-delay:calc(var(--d) + .15s)">MALI</text>
               <text class="tl-idea" x="113" y="192" style="transition-delay:calc(var(--d) + .25s)">async leapfrog</text>
               <text class="tl-venue" x="113" y="206" style="transition-delay:calc(var(--d) + .35s)">ICLR 2021</text>
               <text class="tl-cite" data-key="zhuang2021mali" x="133" y="178" style="transition-delay:calc(var(--d) + .4s)"></text>
             </g>
-            <g style="--d:.41s">
+            <g class="tl-deferred" style="--d:.41s">
               <circle class="tl-dot tl-dot-bot" cx="145" cy="160" r="6" style="transition-delay:var(--d)"/>
               <text class="tl-name" x="145" y="142" style="transition-delay:calc(var(--d) + .15s)">Reversible Heun</text>
               <text class="tl-idea" x="145" y="128" style="transition-delay:calc(var(--d) + .25s)">reversible SDE solver</text>
               <text class="tl-venue" x="145" y="114" style="transition-delay:calc(var(--d) + .35s)">NeurIPS 2021</text>
               <text class="tl-cite" data-key="kidger2021efficient" x="208" y="142" style="transition-delay:calc(var(--d) + .4s)"></text>
             </g>
-            <g style="--d:2.78s">
+            <g class="tl-deferred" style="--d:.55s">
               <circle class="tl-dot tl-dot-bot" cx="585" cy="160" r="6" style="transition-delay:var(--d)"/>
               <text class="tl-name" x="585" y="178" style="transition-delay:calc(var(--d) + .15s)">McCallum&ndash;Foster</text>
               <text class="tl-idea" x="585" y="192" style="transition-delay:calc(var(--d) + .25s)">arbitrary order / non-trivial stability</text>
               <text class="tl-cite" data-key="mccallum2024foster" x="652" y="178" style="transition-delay:calc(var(--d) + .4s)"></text>
             </g>
-            <g style="--d:3.9s">
+            <g class="tl-deferred" style="--d:1.15s">
               <circle class="tl-dot tl-dot-merge" cx="810" cy="120" r="9" fill="var(--bg-card)" stroke="url(#rexGrad)" stroke-width="3" style="transition-delay:var(--d)"/>
               <text class="tl-name" x="822" y="124" style="transition-delay:calc(var(--d) + .15s);text-anchor:start;font-style:italic">Rex</text>
               <text class="tl-venue" x="822" y="138" style="transition-delay:calc(var(--d) + .35s);text-anchor:start">ICML 2026</text>
@@ -2116,14 +2165,16 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
         <p class="goal-lede">Current diffusion inversion methods are bespoke schemes for diffusion ODEs which suffer from:</p>
 
         <ul class="goal-limits goal-limits-2col">
-          <li class="fragment">Low order of convergence</li>
-          <li class="fragment">Poor linear stability</li>
-          <li class="fragment">No support for the SDE formulation</li>
-          <li class="fragment">No adaptive step sizing</li>
-          <li class="fragment">Constructed one solver at a time &mdash; no general procedure</li>
+          <li>Low order of convergence</li>
+          <li>Poor linear stability</li>
+          <li>No support for the SDE formulation</li>
+          <li>No adaptive step sizing</li>
+          <li>Constructed one solver at a time &mdash; no general procedure</li>
         </ul>
 
-        <p class="goal-takeaway fragment">Can we design a <em>general</em> reversible solver &mdash; high-order, stable, and works for both ODEs <em>and</em> SDEs?</p>
+        <p class="goal-takeaway">Can we design a <em>general</em> reversible solver &mdash; high-order, stable, and works for both ODEs <em>and</em> SDEs?</p>
+
+        <span class="fragment" data-tl-rex aria-hidden="true"></span>
       </div>
     </section>
 
@@ -2156,11 +2207,22 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
             <span class="ov-item-desc" data-text="an exact inverse — the reverse step undoes the forward step."></span>
           </li>
         </ol>
+
+        <div class="ov-summary" data-ov-summary>
+          <p class="ov-summary-lede">What this gives us</p>
+          <ul class="ov-summary-list">
+            <li>High-order convergence &amp; linear stability</li>
+            <li>Adaptive step sizing, off the shelf</li>
+            <li>One framework for both <em>ODE</em> and <em>SDE</em> diffusion</li>
+            <li>Exact reversibility &mdash; for free</li>
+          </ul>
+        </div>
       </div>
 
-      <!-- invisible fragment steppers: 1 = colorize, 2 = rearrange into outline -->
+      <!-- invisible fragment steppers: 1 = colorize, 2 = rearrange into outline, 3 = summary -->
       <span class="fragment" data-ov-color aria-hidden="true"></span>
       <span class="fragment" data-ov-dock aria-hidden="true"></span>
+      <span class="fragment" data-ov-summary-step aria-hidden="true"></span>
     </section>
 
 
@@ -2414,8 +2476,18 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
 
         <div class="pp-factory mf-machine-wrap" data-stage="0">
           <div class="pp-cycle-left">
-            <div class="pp-tableau"></div>
-            <div class="pp-tableau-caption"></div>
+            <div class="pp-in-item">
+              <div class="pp-tableau">$\begin{array}{c|c}0&\\\hline&1\end{array}$</div>
+              <div class="pp-tableau-caption">Euler</div>
+            </div>
+            <div class="pp-in-item">
+              <div class="pp-tableau">$\begin{array}{c|cc}0&\\\tfrac12&\tfrac12\\\hline&0&1\end{array}$</div>
+              <div class="pp-tableau-caption">Midpoint</div>
+            </div>
+            <div class="pp-in-item">
+              <div class="pp-tableau">$\begin{array}{c|c|c|c}0&0&0&0\\\hline&1&1&0\end{array}$</div>
+              <div class="pp-tableau-caption">Euler&ndash;Maruyama</div>
+            </div>
           </div>
           <svg class="mf-machine-svg" viewBox="0 0 940 380">
             <!-- Φ input token -->
@@ -2509,14 +2581,14 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
             </g>
           </svg>
           <div class="pp-cycle-right">
-            <div class="pp-result"></div>
+            <div class="pp-result">DDIM / DPM-Solver-1</div>
+            <div class="pp-result">DPM-Solver-2</div>
+            <div class="pp-result">SEEDS-1</div>
           </div>
         </div>
 
-        <span class="fragment" data-pp-scheme="0" data-fragment-index="0"></span>
-        <span class="fragment" data-pp-scheme="1" data-fragment-index="1"></span>
-        <span class="fragment" data-pp-scheme="2" data-fragment-index="2"></span>
-        <p class="goal-takeaway fragment" data-fragment-index="3"><strong>Easy to build new solvers! <span class="lat">E.g.</span>, adaptive step-sizing via Dormand&ndash;Prince 4(5)&nbsp;<span class="cite" data-key="dormand1980family"></span>, or a state-of-the-art SDE solver via ShARK&nbsp;<span class="cite" data-key="foster2024high"></span>.</strong></p>
+        <span class="fragment" data-pp-show data-fragment-index="0"></span>
+        <p class="goal-takeaway fragment" data-fragment-index="1"><strong>Easy to build new solvers! <span class="lat">E.g.</span>, adaptive step-sizing via Dormand&ndash;Prince 4(5)&nbsp;<span class="cite" data-key="dormand1980family"></span>, or a state-of-the-art SDE solver via ShARK&nbsp;<span class="cite" data-key="foster2024high"></span>.</strong></p>
       </div>
     </section>
 
@@ -4388,6 +4460,8 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
 
   // ── render loop ──
   let raf=0, startTs=0, rotPhase=0, lastTs=0, running=false;
+  // play phases 0→1→2 once, then hold on the final unbiased state (skip phase 3 loop-back)
+  const PLAY_TOTAL = PH[0].dur + PH[1].dur + PH[2].dur;
 
   function frame(ts){
     if(!running) return;
@@ -4397,7 +4471,9 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     rotPhase += dt*0.00018;
     resize();
 
-    const elapsed = (ts - startTs) % TOTAL;
+    let elapsed = ts - startTs;
+    let done = elapsed >= PLAY_TOTAL;
+    if(done) elapsed = PLAY_TOTAL;
     let acc=0, pi=0, p=0;
     for(let i=0;i<PH.length;i++){
       if(elapsed < acc+PH[i].dur){ pi=i; p=(elapsed-acc)/PH[i].dur; break; }
@@ -4420,6 +4496,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     group.rotation.y = rotPhase;
     group.rotation.x = Math.sin(rotPhase*0.7)*0.18;
     render();
+    if(done){ running = false; raf = 0; return; }
     raf = requestAnimationFrame(frame);
   }
 
@@ -4945,9 +5022,37 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     else if(ev.fragment===fMF)       setStage(1);
     else if(ev.fragment===fCoupling) setStage(0);
   });
+   Reveal.on('slidechanged',function(ev){
+     var isRV=ev.currentSlide&&ev.currentSlide.hasAttribute&&ev.currentSlide.hasAttribute('data-rv-slide');
+     if(isRV) setStage(0);
+   });
+ })();
+</script>
+
+<!-- Motivation timeline — defer bottom stream + merge + Rex until after bullets -->
+<script>
+(function(){
+  if(!window.Reveal||!Reveal.on) return;
+  var slide=document.querySelector('[data-motivation-slide]');
+  if(!slide) return;
+  var wrap=slide.querySelector('[data-tl-stage]');
+  var fRex=slide.querySelector('[data-tl-rex]');
+  if(!wrap||!fRex) return;
+
+  function setStage(s){ wrap.setAttribute('data-tl-stage',String(s)); }
+
+  Reveal.on('fragmentshown',function(ev){
+    if(ev.fragment===fRex) setStage(1);
+  });
+  Reveal.on('fragmenthidden',function(ev){
+    if(ev.fragment===fRex) setStage(0);
+  });
   Reveal.on('slidechanged',function(ev){
-    var isRV=ev.currentSlide&&ev.currentSlide.hasAttribute&&ev.currentSlide.hasAttribute('data-rv-slide');
-    if(isRV) setStage(0);
+    var isMot=ev.currentSlide&&ev.currentSlide.hasAttribute&&ev.currentSlide.hasAttribute('data-motivation-slide');
+    if(isMot){
+      // released only if the Rex fragment is already visible (e.g. navigating back in)
+      setStage(fRex.classList.contains('visible')?1:0);
+    }
   });
 })();
 </script>
@@ -5022,45 +5127,21 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   var wrap=slide.querySelector('.pp-factory');
   if(!wrap) return;
 
-  var schemes=[
-    {caption:'Euler',           tableau:'$\\begin{array}{c|c}0&\\\\\\hline&1\\end{array}$',          result:'DDIM / DPM-Solver-1'},
-    {caption:'Midpoint',        tableau:'$\\begin{array}{c|cc}0&\\\\\\tfrac12&\\tfrac12\\\\\\hline&0&1\\end{array}$', result:'DPM-Solver-2'},
-    {caption:'Euler–Maruyama',  tableau:'$\\begin{array}{c|c|c|c}0&0&0&0\\\\\\hline&1&1&0\\end{array}$', result:'SEEDS-1'}
-  ];
-  var tableauEl=wrap.querySelector('.pp-tableau');
-  var captionEl=wrap.querySelector('.pp-tableau-caption');
-  var resultEl=wrap.querySelector('.pp-result');
+  var fShow=slide.querySelector('[data-pp-show]');
 
-  function setMath(el,tex){ el.innerHTML=tex; if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([el]); }
-  function setText(el,t){ el.textContent=t; }
-
-  function showScheme(idx){
-    var s=schemes[idx];
-    // reset factory, swap content, run animation
-    wrap.setAttribute('data-stage','0');
-    setText(captionEl,s.caption);
-    setMath(tableauEl,s.tableau);
-    setText(resultEl,s.result);
-    setTimeout(function(){ wrap.setAttribute('data-stage','3'); },700);
-  }
-  function reset(){
-    wrap.setAttribute('data-stage','0');
-    setMath(tableauEl,''); setText(captionEl,''); setText(resultEl,'');
-  }
+  function reveal(){ wrap.setAttribute('data-stage','3'); }
+  function reset(){ wrap.setAttribute('data-stage','0'); }
 
   Reveal.on('fragmentshown',function(ev){
-    if(!ev.fragment||!ev.fragment.hasAttribute('data-pp-scheme')) return;
-    showScheme(+ev.fragment.getAttribute('data-pp-scheme'));
+    if(ev.fragment===fShow) reveal();
   });
   Reveal.on('fragmenthidden',function(ev){
-    if(!ev.fragment||!ev.fragment.hasAttribute('data-pp-scheme')) return;
-    var idx=+ev.fragment.getAttribute('data-pp-scheme');
-    if(idx===0) reset();
-    else showScheme(idx-1);
+    if(ev.fragment===fShow) reset();
   });
   Reveal.on('slidechanged',function(ev){
     var isPp=ev.currentSlide&&ev.currentSlide.hasAttribute&&ev.currentSlide.hasAttribute('data-princeps-slide');
     if(!isPp) reset();
+    else reset();
   });
 })();
 </script>
@@ -5170,6 +5251,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var proposal=slide.querySelector('.ov-proposal');
   var outline=slide.querySelector('.ov-outline');
+  var summary=slide.querySelector('.ov-summary');
   if(!proposal||!outline) return;
 
   // ORDER of docking = outline order (top→bottom): srk, exp, rev
@@ -5308,7 +5390,11 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   function typeAll(){
     var idx=0;
     (function next(){
-      if(idx>=ORDER.length) return;
+      if(idx>=ORDER.length){
+        // auto-advance to the summary fragment once all descriptions are typed
+        if(!goingBack && Reveal.availableFragments().next) Reveal.nextFragment();
+        return;
+      }
       typeDesc(blocks[ORDER[idx]].desc,function(){
         idx++; later(next,TYPE_GAP);
       });
@@ -5370,15 +5456,21 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
       }
     }
     if(ev.fragment.hasAttribute('data-ov-dock')){ goingBack=false; rearrange(); }
+    if(ev.fragment.hasAttribute('data-ov-summary-step')){
+      if(summary) summary.classList.add('is-shown');
+    }
   });
   Reveal.on('fragmenthidden',function(ev){
     if(!ev.fragment) return;
     if(ev.fragment.hasAttribute('data-ov-dock')){ goingBack=true; restore(); }
     if(ev.fragment.hasAttribute('data-ov-color')){ setColored(false); goingBack=false; }
+    if(ev.fragment.hasAttribute('data-ov-summary-step')){
+      if(summary) summary.classList.remove('is-shown');
+    }
   });
   Reveal.on('slidechanged',function(ev){
     var here=ev.currentSlide&&ev.currentSlide.hasAttribute&&ev.currentSlide.hasAttribute('data-overview-slide');
-    if(!here){ restore(); setColored(false); }
+    if(!here){ restore(); setColored(false); if(summary) summary.classList.remove('is-shown'); }
   });
 })();
 </script>
