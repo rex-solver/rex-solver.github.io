@@ -1694,6 +1694,23 @@ section.present .tl-svg .tl-name,section.present .tl-svg .tl-idea,section.presen
 [data-tl-stage="1"] .tl-svg g.tl-deferred .tl-dot{opacity:1;transform:scale(1);transition:opacity .3s ease,transform .3s cubic-bezier(.34,1.56,.64,1);}
 [data-tl-stage="1"] .tl-svg g.tl-deferred text{opacity:1;transition:opacity .35s ease;}
 
+/* the motivation question ("Can we design a general reversible solver…?") is
+   gated on the SAME stage as the blue bottom stream + Rex merge dot, so it
+   reveals TOGETHER with them. The [data-tl-question] paragraph is a following
+   SIBLING of the [data-tl-stage] wrap, so the general-sibling combinator (~)
+   targets it. Hidden at stage 0; at stage 1 it fades/rises in with a delay
+   timed to land as the blue line finishes drawing and the Rex dot pops. */
+.reveal [data-motivation-slide] [data-tl-question]{
+  opacity:0;transform:translateY(6px);transition:none;
+}
+.reveal [data-motivation-slide] [data-tl-stage="1"] ~ [data-tl-question]{
+  opacity:1;transform:none;
+  transition:opacity .6s ease .8s, transform .6s cubic-bezier(.34,1.56,.64,1) .8s;
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal [data-motivation-slide] [data-tl-stage="1"] ~ [data-tl-question]{transition:none !important;}
+}
+
 /* ───── theme toggle — discrete symbol, top-right corner ─────
    A single glyph: moon (☾) in light mode, sun (☀) in dark mode.
    No card / border / shadow — just the symbol. */
@@ -2172,7 +2189,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
           <li>Constructed one solver at a time &mdash; no general procedure</li>
         </ul>
 
-        <p class="goal-takeaway">Can we design a <em>general</em> reversible solver &mdash; high-order, stable, and works for both ODEs <em>and</em> SDEs?</p>
+        <p class="goal-takeaway" data-tl-question>Can we design a <em>general</em> reversible solver &mdash; high-order, stable, and works for both ODEs <em>and</em> SDEs?</p>
 
         <span class="fragment" data-tl-rex aria-hidden="true"></span>
       </div>
@@ -3321,7 +3338,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
               <line class="to-leader" x1="300" y1="140" x2="300" y2="153"/>
               <circle class="to-dot is-ees" cx="300" cy="140" r="6.5"/>
               <text class="to-name is-ees" x="312" y="158" text-anchor="start">EES <tspan class="tl-cite" data-key="shmelev2025explicit"></tspan> <tspan class="tl-cite" data-key="shmelev2025explicit_older"></tspan></text>
-              <text class="to-sub" x="312" y="170" text-anchor="start">nearly reversible &middot; far better stability</text>
+              <text class="to-sub" x="312" y="170" text-anchor="start">nearly reversible &middot; better stability</text>
             </g>
             <!-- DDIM: good stability, ~no reversibility -->
             <!-- label LEFT of dot -->
@@ -3379,7 +3396,66 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
       tex:{ inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']] },
       options:{ skipHtmlTags:['script','noscript','style','textarea','pre'] }
     }
-  });
+   });
+ </script>
+
+<!-- shared navigation-direction detector: lets every per-slide animation
+     controller know whether the CURRENT reveal.js step is moving backward.
+     Fixes half-played/frozen animations when stepping back through fragments:
+     controllers consult RexNav.isBackward() to skip timed forward choreography
+     and auto-advance, snapping straight to the resolved end-state instead. -->
+<script>
+(function(){
+  if(!window.Reveal||!Reveal.on){ window.RexNav={isBackward:function(){return false;}}; return; }
+
+  // Absolute step position across the whole deck: horizontal index dominates,
+  // fragment index is the sub-position within a slide. Comparing successive
+  // positions tells us the travel direction for the step just taken.
+  function pos(){
+    var i=Reveal.getIndices()||{};
+    var h=i.h||0, v=i.v||0;
+    var f=(typeof i.f==='number')?i.f:-1;   // -1 = no fragment shown yet
+    return {h:h,v:v,f:f};
+  }
+  function cmp(a,b){
+    if(a.h!==b.h) return a.h<b.h?-1:1;
+    if(a.v!==b.v) return a.v<b.v?-1:1;
+    if(a.f!==b.f) return a.f<b.f?-1:1;
+    return 0;
+  }
+
+  var last=pos();
+  var backward=false;
+
+  // Update direction by comparing the NEW position (reveal.js has already
+  // committed the new indices by the time it fires these events) against the
+  // last recorded one. This is uniform across all three cases:
+  //   • fragment forward  → f increases → forward
+  //   • fragment backward → f decreases → backward   (fixes the reported bug)
+  //   • slide  forward/back → h/v changes → forward/back
+  // When a backward slide jump lands on a fully-revealed prior slide, its
+  // fragment index is high, but h/v decreased, so the tuple compare still
+  // resolves to BACKWARD — controllers then snap to end-state instead of
+  // replaying forward choreography.
+  function update(){
+    var now=pos();
+    var c=cmp(now,last);
+    if(c!==0) backward=(c<0);
+    last=now;
+  }
+
+  // Handlers run in the order reveal registers them. Our detector is registered
+  // FIRST (its <script> precedes every per-slide controller), so `backward` is
+  // refreshed before any controller's handler for the same event reads it.
+  Reveal.on('fragmenthidden', update);
+  Reveal.on('fragmentshown',  update);
+  Reveal.on('slidechanged',   update);
+
+  window.RexNav={
+    isBackward:function(){ return backward; },
+    refresh:update
+  };
+})();
 </script>
 
 <!-- QR code generator (Kazuhiko Arase, MIT) -->
@@ -4048,15 +4124,18 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     drawRight();
     if(fwdStep < N_STEPS) raf = requestAnimationFrame(fwdTick);
   };
+  const isBack = () => !!(window.RexNav && window.RexNav.isBackward());
   const startForward = () => {
     cancelAnimationFrame(raf);
+    cancelAnimationFrame(bRaf);   // never let a backward RAF keep running underneath
     fwdStartTs = 0;
     resize();
     renderHeatmap();      // resize() wipes fBuf (setting width clears it) — rebuild
     drawHeatmap(fbx);
     stage = 1; fwdStep = 0; bwdFront = -1;
     setStageLabel(1);
-    if(reduceMotion){ fwdStep = N_STEPS; drawLeft(); drawRight(); return; }
+    // reduced-motion OR arriving backward → snap straight to the completed frame.
+    if(reduceMotion || isBack()){ fwdStep = N_STEPS; drawLeft(); drawRight(); return; }
     raf = requestAnimationFrame(fwdTick);
   };
 
@@ -4070,10 +4149,12 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   };
   const startBackward = () => {
     cancelAnimationFrame(bRaf);
+    cancelAnimationFrame(raf);    // never let a forward RAF keep running underneath
     bwdStartTs = 0;
     stage = 2;
     setStageLabel(2);
-    if(reduceMotion){ bwdFront = N_STEPS; drawLeft(); drawRight(); return; }
+    // reduced-motion OR arriving backward → snap straight to the completed frame.
+    if(reduceMotion || isBack()){ bwdFront = N_STEPS; drawLeft(); drawRight(); return; }
     bwdFront = 0;
     bRaf = requestAnimationFrame(bwdTick);
   };
@@ -5216,16 +5297,22 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   var imp = slide.querySelector('[data-prelim-implicit]');
   if(!bwd || !imp) return;
   var FADE = 280, COLLAPSE = 300;
+  var isBack=function(){ return !!(window.RexNav && window.RexNav.isBackward()); };
+  var pendingT=0;
 
   // implicit starts pending so reveal showing it doesn't flash it in
   imp.classList.add('is-pending');
 
   function showImplicit(){
+    clearTimeout(pendingT);
     bwd.classList.add('is-gone');
-    if(reduce){ imp.classList.remove('is-pending'); return; }
-    setTimeout(function(){ imp.classList.remove('is-pending'); }, FADE + COLLAPSE);
+    // reduced-motion OR arriving backward → resolve instantly, no fade timer
+    // (prevents a stale timeout from un-hiding implicit while stepping back).
+    if(reduce || isBack()){ imp.classList.remove('is-pending'); return; }
+    pendingT=setTimeout(function(){ imp.classList.remove('is-pending'); }, FADE + COLLAPSE);
   }
   function restoreBackwards(){
+    clearTimeout(pendingT);           // cancel any in-flight reveal of implicit
     imp.classList.add('is-pending');
     bwd.classList.remove('is-gone');
   }
@@ -5392,7 +5479,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     (function next(){
       if(idx>=ORDER.length){
         // auto-advance to the summary fragment once all descriptions are typed
-        if(!goingBack && Reveal.availableFragments().next) Reveal.nextFragment();
+        if(!isBack() && Reveal.availableFragments().next) Reveal.nextFragment();
         return;
       }
       typeDesc(blocks[ORDER[idx]].desc,function(){
@@ -5403,8 +5490,30 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
 
   function setColored(on){ proposal.classList.toggle('is-colored',on); }
 
+  // Instantly place the outline in its fully-docked, fully-typed end state with
+  // no flight/typewriter choreography. Used when the user arrives at this step
+  // by stepping BACKWARD, so nothing is left half-played.
+  function snapDocked(){
+    if(docked) return;
+    docked=true;
+    clearTimers();
+    setColored(true);
+    outline.classList.add('is-live');
+    ORDER.forEach(function(id){
+      var b=blocks[id];
+      seatWord(b);
+      if(b.seat) b.seat.style.visibility='';        // reveal seated copy immediately
+      if(b.word) b.word.style.visibility='hidden';  // hide sentence original
+      if(b.item) b.item.classList.add('is-filled');
+      if(b.desc){ b.desc.classList.remove('is-typing'); b.desc.textContent=b.desc.getAttribute('data-text')||''; }
+    });
+    slide.classList.add('ov-sentence-gone');
+  }
+
   function rearrange(){
     if(docked) return;
+    // arriving here by stepping backward → skip the choreography, snap to end.
+    if(isBack()){ snapDocked(); return; }
     docked=true;
     clearTimers();
     setColored(true);                   // ensure colors on if jumped straight here
@@ -5442,7 +5551,8 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     });
   }
 
-  var goingBack=false;  // suppresses color→dock auto-advance during backward nav
+  // consult the shared direction detector; treat missing helper as forward.
+  function isBack(){ return !!(window.RexNav && window.RexNav.isBackward()); }
 
   Reveal.on('fragmentshown',function(ev){
     if(!ev.fragment) return;
@@ -5450,20 +5560,21 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
       setColored(true);
       // after the title colors in, immediately flow into the docking animation
       // (auto-advance to the dock fragment — no extra keypress needed). Skip
-      // this when the user is stepping BACKWARD, so they can rest on this step.
-      if(!goingBack){
-        later(function(){ if(Reveal.availableFragments().next) Reveal.nextFragment(); }, COLOR_HOLD);
+      // this when the user is stepping BACKWARD, so they can rest on this step
+      // and we never auto-advance them forward against their travel direction.
+      if(!isBack()){
+        later(function(){ if(!isBack() && Reveal.availableFragments().next) Reveal.nextFragment(); }, COLOR_HOLD);
       }
     }
-    if(ev.fragment.hasAttribute('data-ov-dock')){ goingBack=false; rearrange(); }
+    if(ev.fragment.hasAttribute('data-ov-dock')){ rearrange(); }
     if(ev.fragment.hasAttribute('data-ov-summary-step')){
       if(summary) summary.classList.add('is-shown');
     }
   });
   Reveal.on('fragmenthidden',function(ev){
     if(!ev.fragment) return;
-    if(ev.fragment.hasAttribute('data-ov-dock')){ goingBack=true; restore(); }
-    if(ev.fragment.hasAttribute('data-ov-color')){ setColored(false); goingBack=false; }
+    if(ev.fragment.hasAttribute('data-ov-dock')){ restore(); }
+    if(ev.fragment.hasAttribute('data-ov-color')){ setColored(false); }
     if(ev.fragment.hasAttribute('data-ov-summary-step')){
       if(summary) summary.classList.remove('is-shown');
     }
