@@ -839,6 +839,24 @@ html[data-theme="dark"] .reveal .lollipop-svg .is-rex .lp-val{fill:var(--mauve)}
 .reveal section.present .lollipop-svg .lp-row:nth-of-type(6) .lp-dot,
 .reveal section.present .lollipop-svg .lp-row:nth-of-type(6) .lp-val{transition-delay:1.25s}
 
+/* ── resampling slide reformat: the three lollipop panels were clumping at the
+   top of the console with dead space below, and the takeaway caption was small
+   and dim. Make this slide's console a flex column so the chart grows to fill
+   and vertically centres, and give the takeaway real weight. Scoped to slide. */
+.reveal [data-resample-slide] .console{
+  display:flex;flex-direction:column;
+}
+.reveal [data-resample-slide] .lollipop-3up{
+  flex:1 1 auto;min-height:0;align-items:center;
+  margin:.4em auto;
+}
+.reveal [data-resample-slide] .radar-caption{
+  font-size:.56em;color:var(--text-secondary);
+  margin-top:.6em;padding:.7em .8em 0;
+  border-top:1px solid var(--hairline);
+  flex:0 0 auto;
+}
+
 /* flow-matching Boltzmann demo (slide 11b — noise → biased → reweight → unbiased) */
 .reveal .flow-demo{
   display:flex;flex-direction:row;gap:.8em;align-items:stretch;
@@ -914,10 +932,22 @@ html[data-theme="dark"] .reveal .flow-stage[data-fs="2"].is-active{background:rg
   font-variant-numeric:tabular-nums;transition:color .4s ease;
 }
 .reveal .flow-ess.is-high{color:var(--ok)}
-.reveal .flow-weights{width:100%;height:64px;display:block;font-family:var(--mono)}
-.reveal .flow-weights .wbar{fill:var(--mauve);transition:fill .4s ease}
-.reveal .flow-weights.is-unbiased .wbar{fill:var(--ok)}
-.reveal .flow-weights .waxis{stroke:var(--hairline-strong);stroke-width:1}
+/* 1D density panel: proposal q(x) reweighted into target p(x) */
+.reveal .flow-dens{width:100%;height:74px;display:block;font-family:var(--mono)}
+.reveal .flow-dens .dens-axis{stroke:var(--hairline-strong);stroke-width:1}
+.reveal .flow-dens .dens-tick{font-size:7px;fill:var(--text-dim);text-anchor:middle;font-weight:600;letter-spacing:.04em}
+/* faint reference outlines of the fixed proposal and target */
+.reveal .flow-dens .dens-ref{fill:none;stroke-width:1;stroke-dasharray:3 2;opacity:.5}
+.reveal .flow-dens .dens-ref-q{stroke:var(--text-dim)}
+.reveal .flow-dens .dens-ref-p{stroke:var(--accent-pink);opacity:.35}
+html[data-theme="dark"] .reveal .flow-dens .dens-ref-p{stroke:var(--mauve)}
+/* the live (reweighted) density */
+.reveal .flow-dens .dens-fill{fill:var(--mauve-tint-08);transition:fill .4s ease}
+.reveal .flow-dens .dens-line{fill:none;stroke:var(--mauve-deep);stroke-width:1.6;stroke-linejoin:round}
+html[data-theme="dark"] .reveal .flow-dens .dens-line{stroke:var(--mauve)}
+.reveal .flow-dens.is-unbiased .dens-fill{fill:rgba(88,117,57,.10)}
+.reveal .flow-dens.is-unbiased .dens-line{stroke:var(--ok)}
+html[data-theme="dark"] .reveal .flow-dens.is-unbiased .dens-line{stroke:var(--ok)}
 .reveal .flow-weights-cap{
   font-family:var(--mono);font-size:.32em;color:var(--text-dim);
   margin-top:.25em;line-height:1.4;
@@ -933,7 +963,7 @@ html[data-theme="dark"] .reveal .flow-stage[data-fs="2"].is-active{background:rg
   .reveal .flow-mol{min-height:240px}
 }
 @media (prefers-reduced-motion:reduce){
-  .reveal .flow-mol,.reveal .flow-stage,.reveal .flow-weights .wbar{transition:none !important}
+  .reveal .flow-mol,.reveal .flow-stage,.reveal .flow-dens .dens-fill,.reveal .flow-dens .dens-line{transition:none !important}
 }
 
 /* slopegraph entrance animation (triggered when slide becomes .present) */
@@ -1893,7 +1923,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
         <div class="title-rule"></div>
         <div class="authors">
           Zander W. Blasingame<sup>1,2</sup>&emsp;&middot;&emsp;Chen Liu<sup>2</sup>
-          <div class="affil"><sup>1</sup> AITHYRA, Vienna&emsp;<sup>2</sup> Clarkson University</div>
+          <div class="affil"><sup>1</sup> AITHYRA,&emsp;<sup>2</sup> Clarkson University</div>
         </div>
       </div>
       <div class="wordmarks">
@@ -3069,11 +3099,21 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
             </div>
             <div class="flow-weights-card">
               <div class="flow-weights-title">
-                <span>importance weights w<sub>i</sub></span>
-                <span class="flow-ess" id="flowEss">ESS 0.030</span>
+                <span>density over reaction coord.</span>
+                <span class="flow-ess" id="flowEss">biased q(x)</span>
               </div>
-              <svg class="flow-weights" id="flowWeights" viewBox="0 0 320 64" preserveAspectRatio="none"></svg>
-              <div class="flow-weights-cap">concentrated weights = low ESS = biased &middot; uniform weights = high ESS = unbiased</div>
+              <svg class="flow-dens" id="flowDens" viewBox="0 0 320 74" preserveAspectRatio="none">
+                <!-- faint reference curves: proposal q(x) and target p(x) -->
+                <path class="dens-ref dens-ref-q" id="densRefQ" d=""/>
+                <path class="dens-ref dens-ref-p" id="densRefP" d=""/>
+                <!-- the live density: q(x) reweighted toward p(x) -->
+                <path class="dens-fill" id="densFill" d=""/>
+                <path class="dens-line" id="densLine" d=""/>
+                <line class="dens-axis" x1="0" y1="70" x2="320" y2="70"/>
+                <text class="dens-tick" x="78" y="72" id="densTickA">mode A</text>
+                <text class="dens-tick" x="248" y="72" id="densTickB">mode B</text>
+              </svg>
+              <div class="flow-weights-cap">reweight by w(x)&nbsp;=&nbsp;p(x)/q(x): the biased proposal <em>q</em> becomes the true target <em>p</em> &mdash; mode B appears.</div>
             </div>
           </div>
         </div>
@@ -3082,7 +3122,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     </section>
 
     <!-- ═══════════ 11 · BOLTZMANN SAMPLING ═══════════ -->
-    <section>
+    <section data-resample-slide>
       <div class="console">
         <div class="frametitle">
           <span class="kicker">boltzmann sampling</span>
@@ -4335,8 +4375,12 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   const molMode   = document.getElementById('flowMolMode');
   const stagesEl  = document.getElementById('flowStages');
   const essEl     = document.getElementById('flowEss');
-  const weightsSvg= document.getElementById('flowWeights');
-  if(!canvas || !molPane || !stagesEl || !essEl || !weightsSvg) return;
+  const densSvg   = document.getElementById('flowDens');
+  const densFillEl= document.getElementById('densFill');
+  const densLineEl= document.getElementById('densLine');
+  const densRefQEl= document.getElementById('densRefQ');
+  const densRefPEl= document.getElementById('densRefP');
+  if(!canvas || !molPane || !stagesEl || !essEl || !densSvg) return;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -4349,41 +4393,50 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
   const lerp = (a,b,t) => a + (b-a)*t;
   const blendArr = (a,b,t) => a.map((v,i) => lerp(v, b[i], t));
 
-  // ── weight-bar keyframes (normalized heights 0..1) ──
-  const N_BARS = 16;
-  const concentrated = Array.from({length:N_BARS}, (_,i) => i===0 ? 1.0 : 0.04);
-  const reweighted   = Array.from({length:N_BARS}, (_,i) =>
-    0.18 + 0.62*Math.exp(-((i-5)**2)/8) * (i%2 ? 0.8 : 1));
-  const uniform      = Array.from({length:N_BARS}, () => 0.5);
-  const _rwMax = Math.max(...reweighted);
-  for(let i=0;i<N_BARS;i++) reweighted[i] /= _rwMax;
+  // ── 1D density: proposal q(x) reweighted into target p(x) ────────────
+  // We show a density over a 1D reaction coordinate. The biased proposal q(x)
+  // (what flow matching samples) is a single peak at mode A. The true target
+  // p(x) is bimodal (a small mode A + a dominant mode B). Reweighting by the
+  // importance weight w(x)=p(x)/q(x) reshapes the proposal into the target —
+  // mode B appears. The live density interpolates q→p; q and p are drawn as
+  // faint fixed reference curves so the reshaping reads clearly.
+  const DVW = 320, DBASE = 70, DTOP = 8;            // svg coords: baseline / top margin
+  const DN = 96;                                    // samples across the axis
+  const xA = 78, xB = 248;                          // pixel centres of modes A and B
+  const gauss = (x, mu, sig) => Math.exp(-((x-mu)**2)/(2*sig*sig));
+  // proposal q(x): biased toward mode A, but with a tiny bit of mass at mode B
+  // (flow matching can reach mode B, just very rarely — so it's small, not zero)
+  const qFn = x => gauss(x, xA, 26) + 0.07*gauss(x, xB, 26);
+  // target p(x): true bimodal Boltzmann — minor A well + dominant B well
+  const pFn = x => 0.42*gauss(x, xA, 22) + 1.0*gauss(x, xB, 30);
+  // sample both, normalise to a common peak so heights are comparable on-screen
+  const xs = Array.from({length:DN}, (_,i) => (i/(DN-1))*DVW);
+  const qRaw = xs.map(qFn), pRaw = xs.map(pFn);
+  const _norm = Math.max(...qRaw, ...pRaw);
+  const qArr = qRaw.map(v => v/_norm), pArr = pRaw.map(v => v/_norm);
 
-  // build svg bars once
-  const VW = 320, VH = 64, barW = (VW-4)/N_BARS;
-  const svgNS = 'http://www.w3.org/2000/svg';
-  const bars = [];
-  for(let i=0;i<N_BARS;i++){
-    const r = document.createElementNS(svgNS,'rect');
-    r.setAttribute('class','wbar');
-    r.setAttribute('x', (2 + i*barW + 0.5).toFixed(2));
-    r.setAttribute('width', (barW - 1).toFixed(2));
-    r.setAttribute('rx', '1');
-    weightsSvg.appendChild(r);
-    bars.push(r);
-  }
-  const axisLine = document.createElementNS(svgNS,'line');
-  axisLine.setAttribute('class','waxis');
-  axisLine.setAttribute('x1','0'); axisLine.setAttribute('x2',String(VW));
-  axisLine.setAttribute('y1',String(VH-0.5)); axisLine.setAttribute('y2',String(VH-0.5));
-  weightsSvg.appendChild(axisLine);
-
-  function setBars(heights, unbiased){
-    for(let i=0;i<N_BARS;i++){
-      const h = Math.max(1, heights[i]*(VH-4));
-      bars[i].setAttribute('y', (VH - h).toFixed(2));
-      bars[i].setAttribute('height', h.toFixed(2));
+  // build an SVG path: `line` = curve outline only, `fill` = closed area
+  function densPath(vals, closed){
+    let d = '';
+    for(let i=0;i<DN;i++){
+      const x = xs[i].toFixed(2);
+      const y = (DBASE - vals[i]*(DBASE-DTOP)).toFixed(2);
+      d += (i===0 ? 'M' : 'L') + x + ' ' + y + ' ';
     }
-    weightsSvg.classList.toggle('is-unbiased', !!unbiased);
+    if(closed) d += 'L' + DVW.toFixed(2) + ' ' + DBASE + ' L0 ' + DBASE + ' Z';
+    return d.trim();
+  }
+  // fixed reference outlines drawn once
+  densRefQEl.setAttribute('d', densPath(qArr, false));
+  densRefPEl.setAttribute('d', densPath(pArr, false));
+
+  // live density at interpolation t (0 = proposal q, 1 = target p)
+  function setDensity(t, unbiased){
+    const tt = smoothstep(t);
+    const cur = qArr.map((v,i) => lerp(v, pArr[i], tt));
+    densFillEl.setAttribute('d', densPath(cur, true));
+    densLineEl.setAttribute('d', densPath(cur, false));
+    densSvg.classList.toggle('is-unbiased', !!unbiased);
   }
 
   // ── three.js scene (lazily initialised — THREE may not be loaded yet) ──
@@ -4510,20 +4563,17 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     return out;
   }
 
-  // weight bars + ESS for a given phase + progress
-  function phaseWeights(pi, p){
-    if(pi===0){
-      return { bars: concentrated, ess: lerp(0.010, 0.030, p), unbiased:false };
-    } else if(pi===1){
-      const t = smoothstep(p);
-      return { bars: blendArr(concentrated, reweighted, t), ess: lerp(0.030, 0.070, t), unbiased:false };
-    } else if(pi===2){
-      const t = smoothstep(p);
-      return { bars: blendArr(reweighted, uniform, t), ess: lerp(0.070, 0.140, t), unbiased: p>=0.5 };
-    } else {
-      const t = smoothstep(p);
-      return { bars: uniform.map(v => v*(1-t)), ess: lerp(0.140, 0.010, t), unbiased:false };
-    }
+  // Density interpolation q→p, tracking the molecule's mode A→B transition.
+  //  phase 0 (noise→A): density = biased proposal q(x)                (t=0)
+  //  phase 1 (reweight): density ramps q→halfway as w=p/q is applied  (t 0→0.5)
+  //  phase 2 (A→B):      density completes the reshape into target p  (t 0.5→1)
+  //  phase 3 (dissolve): loop-back, no bar fade needed (fill fades w/ molecule)
+  function phaseDensity(pi, p){
+    if(pi===0)      return { t: 0,               unbiased:false, label:'biased q(x)' };
+    else if(pi===1) return { t: 0.5*smoothstep(p), unbiased:false, label:'reweight · w = p/q' };
+    else if(pi===2){ const t = 0.5 + 0.5*smoothstep(p);
+                     return { t, unbiased: p>=0.5, label: p>=0.5 ? 'target p(x)' : 'reweight · w = p/q' }; }
+    else            return { t: 1,               unbiased:false, label:'target p(x)' };
   }
 
   function setStage(active, doneArr){
@@ -4562,10 +4612,10 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     }
 
     setPositions(phasePos(pi, p, rotPhase));
-    const w = phaseWeights(pi, p);
-    setBars(w.bars, w.unbiased);
-    essEl.textContent = 'ESS ' + w.ess.toFixed(3);
-    essEl.classList.toggle('is-high', w.unbiased);
+    const d = phaseDensity(pi, p);
+    setDensity(d.t, d.unbiased);
+    essEl.textContent = d.label;
+    essEl.classList.toggle('is-high', d.unbiased);
     setStage(PH[pi].active, PH[pi].done);
 
     if(pi===0)        setMode(p<0.5 ? 'noise' : 'mode A', false);
@@ -4604,8 +4654,9 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
       return;
     }
     setPositions(confB);
-    setBars(uniform, true);
-    essEl.textContent = 'ESS 0.140'; essEl.classList.add('is-high');
+    setDensity(1, true);               // reweighted density = target p(x)
+    essEl.textContent = 'target p(x)';
+    essEl.classList.add('is-high');
     setStage(2, [0,1]);
     setMode('mode B', true);
     setOpacity(1);
