@@ -1178,6 +1178,36 @@ html[data-theme="dark"] .reveal .rv-takeaway em{color:var(--mauve);}
 .reveal .huge-center{font-family:var(--mono-chrome);font-size:3.2em;color:var(--mauve);text-align:center;}
 .reveal .cursor{display:inline-block;width:.6em;height:1em;background:var(--mauve);vertical-align:-.12em;margin-left:.12em;animation:blink 1.05s steps(1) infinite;}
 @keyframes blink{50%{opacity:0;}}
+/* Q&A slide: big "?" plus project QR + poster-session details */
+.reveal [data-qa-slide] .qa-wrap{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:1.1em;
+}
+.reveal [data-qa-slide] .qa-wrap .huge-center{margin:0;line-height:1;}
+.reveal [data-qa-slide] .qa-info{
+  display:flex;align-items:center;justify-content:center;gap:1.6em;
+}
+/* this slide's QR is centered inline (not the right-edge absolute variant) */
+.reveal [data-qa-slide] .qa-qr{
+  position:static;transform:none;right:auto;top:auto;
+}
+.reveal [data-qa-slide].present .qa-qr{opacity:1}
+.reveal [data-qa-slide] .qa-poster{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.18em;
+  font-family:var(--mono);text-align:left;
+  padding-left:1.4em;border-left:1px solid var(--hairline-strong);
+}
+.reveal [data-qa-slide] .qa-poster-label{
+  font-size:.34em;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mauve);
+}
+.reveal [data-qa-slide] .qa-poster-when{
+  font-size:.5em;font-weight:600;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;
+}
+.reveal [data-qa-slide] .qa-poster-where{
+  font-size:.44em;color:var(--text-secondary);letter-spacing:.02em;
+}
 
 /* ───── horizontal lineage timeline ───── */
 .reveal .tl-wrap{margin:.5em 0;overflow-x:auto;}
@@ -2251,17 +2281,17 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
           </li>
           <li class="ov-item" data-block="rev">
             <span class="ov-slot" data-slot="rev"></span>
-            <span class="ov-item-desc" data-text="an exact inverse — the reverse step undoes the forward step."></span>
+            <span class="ov-item-desc" data-text="an numerical scheme which is exactly reversible."></span>
           </li>
         </ol>
 
         <div class="ov-summary" data-ov-summary>
           <p class="ov-summary-lede">What this gives us</p>
           <ul class="ov-summary-list">
-            <li>High-order convergence &amp; linear stability</li>
-            <li>Adaptive step sizing, off the shelf</li>
-            <li>One framework for both <em>ODE</em> and <em>SDE</em> diffusion</li>
-            <li>Exact reversibility &mdash; for free</li>
+            <li>High-order convergence &amp; linear stability (ODEs)</li>
+            <li>Reversible adaptive step sizing</li>
+            <li>One framework for both diffuions <em>ODEs</em> and <em>SDEs</em></li>
+            <li>Reversible versions of popular diffusion solvers</li>
           </ul>
         </div>
       </div>
@@ -3287,7 +3317,7 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
           <span class="kicker">summary</span>
           <h2>What <em>Rex</em> Gives You</h2>
         </div>
-        <p class="rex-hero"><strong><em>Rex</em></strong> is a family of <strong>algebraically reversible</strong> diffusion solvers &mdash; the reverse step exactly undoes the forward step.</p>
+        <p class="rex-hero"><strong><em>Rex</em></strong> is a family of <strong>algebraically reversible</strong> diffusion solvers.</p>
         <div class="rex-feats">
           <div class="rex-feat">
             <div class="rf-glyph">[ &#8646; ]</div>
@@ -3393,8 +3423,21 @@ html[data-theme="dark"] .reveal .tl-svg .tl-cite{fill:var(--mauve);}
     </section>
 
     <!-- ═══════════ 14 · Q&A ═══════════ -->
-    <section class="title-slide">
-      <div class="huge-center" style="display:flex;align-items:center;justify-content:center;height:100%;">?</div>
+    <section class="title-slide" data-qa-slide>
+      <div class="qa-wrap">
+        <div class="huge-center">?</div>
+        <div class="qa-info">
+          <div class="mf-qr qa-qr" data-qr-url="https://rex-solver.github.io">
+            <div class="mf-qr-img"></div>
+            <div class="mf-qr-caption">rex-solver.github.io</div>
+          </div>
+          <div class="qa-poster">
+            <span class="qa-poster-label">Poster Session</span>
+            <span class="qa-poster-when">July 8 &middot; 10:30&ndash;12:15</span>
+            <span class="qa-poster-where">Hall A &middot; #2402</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ═══════════ 16 · REFERENCES ═══════════ -->
